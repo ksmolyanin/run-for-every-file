@@ -1,16 +1,15 @@
 # run-for-every-file
 
-*node.js 6.x is required*
+*Node.js >= 6.x is required*
 
-This is a small node.js utility that do only one thing:
-it enumerates files and runs a shell command for every file.
-
-It is primarily intended for using NPM as task runner
-(look for "npm run ..." and NPM "scripts" section),
-which is suited quite well for building your node.js/web applications
-(bundling, minification and so on).
-
+This is a small node.js utility that enumerates files by pattern
+and runs a shell command for every file.
 It is cross-platform and should work under Linux, OS X and Windows.
+
+It is primarily intended for NPM used as task runner
+(look for "npm run ..." command and NPM "scripts" section).
+NPM is suited quite well for building node.js/web applications
+(doing minification and so on).
 
 ## Usage
 
@@ -24,61 +23,68 @@ Run as shell command
 
 ### Parameters
 
-`--src` - source directory; example: `--src './src/'`
+`--src` - source directory: `--src './src/'`
 
-`--dest` - destination directory; example: `--dest './dist/prod/'`
+`--dest` - destination directory: `--dest './dist/prod/'`
 
-`--file` - file pattern; example: `--file '**/*.js'` - gets all *.js files recursively. It uses *glob* syntax. See description of glob patterns: https://github.com/isaacs/node-glob
+`--file` - file pattern: `--file '**/*.js'` - gets all *.js files recursively.
 
-`--not-file` - file anti-pattern; example: `--file '**/*.min.js'`
+Patterns use "glob" syntax: https://github.com/isaacs/node-glob
 
-Both `--file` and `--not-file` can be used multiple times in one command. Think about them as appended by logical AND.
+`--not-file` - file anti-pattern: `--file '**/*.min.js'`
 
-`--run` - shell command; example: `cat {{file}}` - outputs content of every file to the screen
+Both `--file` and `--not-file` can be used multiple times in one command. Think about them as joined by logical AND.
 
-It is possible to use the following variables inside "run" string:
+`--run` - shell command: `cat {{src-file}}` - outputs content of every file to the screen
 
-`{{src}}` - value passed in `--src` param
+#### The following variables are available inside "run" string:
 
-`{{dest}}` - value passed in `--dest` param
+`{{src-file}}` - path to exact source file: "./src/app/js/main.js"
 
-`{{src-file}}` - path to exact source file; example: "./src/app/js/main.js"
+`{{dest-file}}` - path to exact destination file: "./dist/prod/app/js/main.js"
 
-`{{dest-file}}` - path to exact destination file; example: "./dist/prod/app/js/main.js"
+`{{file}}` - relative file path: "app/js/main.js"
 
-`{{file}}` - path to the file relative to "src" parameter ("src" part isn't included); example: "app/js/main.js"
+`{{file-path}}` - only path part of `{{file}}`: "app/js" (without trailing "/")
 
-`{{file-path}}` - only path part of `{{file}}`; example: "app/js" (without trailing "/")
+`{{file-name}}` - base file name: "main"
 
-`{{file-name}}` - only base file name without extension; example: "main.js"
+`{{file-ext}}` - file extension: "js"
 
-`{{file-ext}}` - file extension; example: "js" (without leading ".")
+`{{file-name-ext}}` - file name with extension: "main.js"
 
-`{{file-name-ext}}` - file name with extension; example: "main.js"
-
-Also you can pass param with any other name and it will be available as variable `{{your-param-name-here}}`.
+Moreover, you can pass a param with any other name and it will be available as variable `{{your-param-name-here}}`.
 
 #### Advices
 
-- Use trailing slash "/" in directory paths: `--src './src/'`
-- Enclose params into quotes (single or double) to prevent substitution of globs by OS: `--file '**/*.js'` should be used instead of just `--file **/*.js`
+- Use trailing slash "/" in directory paths: `--src './src/'` (not just `--src './src'`).
+- Enclose params into quotes to prevent substitution of globs by OS: `--file '**/*.js'` (not just `--file **/*.js`).
+  For Linux both single ('...') and double ("...") quotes are ok, but Windows accepts only double quotes.
 
 #### Example
 
-This will just copy all *.js files (excluding *.min.js files) from "./src/" recursively to "./dist/prod/" (without dir structure):
+This example command will copy all *.js files (excluding *.min.js files) from "./src/" recursively to "./dist/prod/" (without dir structure):
 
     run-for-every-file --src './src/' --dest './dist/prod/' --file '**/*.js' --not-file '**/*.min.js' --run 'shx cp -f  {{src-file}} {{dest}}/{{file-name-ext}}'
 
-`shx` is node.js utility that makes some *nix commands available cross-platform. See https://github.com/shelljs/shx
+`shx` is node.js utility that makes some *nix commands available cross-platform: https://github.com/shelljs/shx
 
 #### Complex example of package.json
 
-The following set of commands can be run, for example, as "npm run build:qa" or "npm run build:prod".
+Actions performed there are:
 
-It cleans destination dir, clones dir structure inside destination dir,
-cleans up and minifies js (except already minified *.min.js files), html, css and json,
-builds js source maps (only for "qa" build)
-and copies other files (images and so on) to destination dir.
+- Clean destination dir;
+- Clones dir structure inside destination dir;
+- Clean up and minify js (except already minified *.min.js files);
+- Clean up and minify html;
+- Clean up and minify css;
+- Clean up and minify json;
+- Builds JS source maps (only for "qa" build);
+- Copies other files (images and so on) to destination dir.
+
+It can be run from command prompt by "npm run build:qa" or "npm run build:prod".
+
+To simplify reading single quotes are used, but on Windows use escaped double quotes ("..... \"...\" .....").
 
     {
       "name": "my-application",
