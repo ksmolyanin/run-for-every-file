@@ -10,6 +10,7 @@
 
 const path = require('path');
 const execSync = require('child_process').execSync;
+const vm = require('vm');
 
 const glob = require('glob');
 const minimist = require('minimist');
@@ -47,7 +48,6 @@ function placeParams(template, params, srcDir = null, srcFile = null, destDir = 
             } else {
                 throw new Error('Cannot get path to substitute {{' + name + '}} param!');
             }
-
             switch (name) {
                 case 'file':
                     return relPath;
@@ -61,9 +61,9 @@ function placeParams(template, params, srcDir = null, srcFile = null, destDir = 
                 case 'file-name-ext':
                     return path.basename(relPath);
             }
-        } else if (name === 'run') {
-            return '{{run}}';
-        } else {
+        } else if (['run', 'run-js'].includes(name)) { // not replaceable params
+            return '{{' + name + '}}';
+        } else { // optional replaceable params
             return name in params ? params[name] : '{{' + name + '}}';
         }
     });
@@ -99,15 +99,18 @@ function findFiles(srcDir, globPattern, globAntiPattern = '', globOptions = {}) 
 }
 
 /**
- * It executes shell command.
+ * It executes shell command or evaluates JS string.
+ * @param {boolean} isJsCommand
  * @param {string} command
  * @param {boolean} isSilent
  */
-function run(command, isSilent = false) {
-    const commandStdOut = execSync(command);
-    if (!isSilent) {
-        process.stdout.write(`COMMAND: ${command}\n`);
-        process.stdout.write(commandStdOut);
+function run(isJsCommand, command, isSilent = false) {
+    !isSilent && process.stdout.write(`COMMAND: ${command}\n`);
+    if (isJsCommand) {
+        vm.runInThisContext('(function (require) { ' + command + ' });')(require);
+    } else {
+        const output = execSync(command) || '';
+        !isSilent && process.stdout.write(output);
     }
 }
 
@@ -116,7 +119,8 @@ const srcDir = params.src || null;
 const destDir = params.dest || null;
 const globPattern = params.file || '';
 const globAntiPattern = params['not-file'] || '';
-const command = params.run || null;
+const command = params.run || params['run-js'] || null;
+const isJsCommand = 'run-js' in params;
 const isSilent = Boolean(params.silent);
 const includeDotFiles = Boolean(params.dot);
 
@@ -131,7 +135,7 @@ if (!command) {
 }
 
 if (!srcDir) {
-    run(placeParams(command, params), isSilent);
+    run(isJsCommand, placeParams(command, params), isSilent);
     process.exit();
 }
 
@@ -144,5 +148,5 @@ if (!srcFiles.length) {
 
 srcFiles.forEach((srcFile) => {
     const destFile = destDir ? destDir + srcFile.substr(srcDir.length) : null;
-    run(placeParams(command, params, srcDir, srcFile, destDir, destFile), isSilent);
+    run(isJsCommand, placeParams(command, params, srcDir, srcFile, destDir, destFile), isSilent);
 });

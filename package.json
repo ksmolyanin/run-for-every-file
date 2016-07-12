@@ -1,7 +1,7 @@
 {
   "name": "run-for-every-file",
-  "version": "1.0.3",
-  "description": "Small node.js utility that enumerates files and runs a shell command for every file.",
+  "version": "1.0.4",
+  "description": "Node.js utility that enumerates files and runs a command for every file.",
   "author": "Konstantin Smolyanin",
   "license": "MIT",
   "repository": {
