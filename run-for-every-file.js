@@ -8,6 +8,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const execSync = require('child_process').execSync;
 const vm = require('vm');
@@ -93,6 +94,10 @@ function findFiles(srcDir, globPattern, globAntiPattern = '', globOptions = {}) 
         result = includeFiles.filter((file) => !excludeFiles.includes(file));
     } else {
         result = includeFiles;
+    }
+
+    if (includeDotFiles) {
+        result = includeFiles.filter((file) => fs.lstatSync(file).isFile());
     }
 
     return result;
