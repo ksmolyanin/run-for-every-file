@@ -37,6 +37,12 @@ Both `--file` and `--not-file` can be used multiple times in one command. Think 
 
 `--run-js` - JavaScript command. Example: `console.log('{{src-file}}')` - the same as above
 
+`--not-file` - file anti-pattern. Example: `--not-file '**/*.min.js'`
+
+`--dot` - enable glob's `dot` setting to include names starting with dots, such as `.gitignore`. Example: `--file * --dot`
+
+`--only-files` - use with `--dot` to filter out non-file names, such as `.vscode/` directories. Example: `--file */* --dot --only-files`
+
 #### The following variables are available inside "run" and "run-js" strings:
 
 `{{src-file}}` - path to exact source file. Example: "./src/app/js/main.js"

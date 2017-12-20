@@ -8,6 +8,7 @@
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const execSync = require('child_process').execSync;
 const vm = require('vm');
@@ -95,6 +96,10 @@ function findFiles(srcDir, globPattern, globAntiPattern = '', globOptions = {}) 
         result = includeFiles;
     }
 
+    if (onlyFiles) {
+        result = includeFiles.filter((file) => fs.lstatSync(file).isFile());
+    }
+
     return result;
 }
 
@@ -122,12 +127,13 @@ const globAntiPattern = params['not-file'] || '';
 const command = params.run || params['run-js'] || null;
 const isJsCommand = 'run-js' in params;
 const isSilent = Boolean(params.silent);
-const includeDotFiles = Boolean(params.dot);
+const includeDots = Boolean(params.dot);
+const onlyFiles = Boolean(params["only-files"]);
 
 const globOptions = {
     mark: true,
     strict: true,
-    dot: includeDotFiles
+    dot: includeDots
 };
 
 if (!command) {
