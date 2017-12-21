@@ -29,15 +29,13 @@ Run as shell command
 
 Patterns use "glob" syntax: https://github.com/isaacs/node-glob
 
-`--not-file` - file anti-pattern. Example: `--file '**/*.min.js'`
-
-Both `--file` and `--not-file` can be used multiple times in one command. Think about them as joined by logical AND.
-
 `--run` - shell command. Example: `echo {{src-file}}` - outputs name of every source file to the screen
 
 `--run-js` - JavaScript command. Example: `console.log('{{src-file}}')` - the same as above
 
 `--not-file` - file anti-pattern. Example: `--not-file '**/*.min.js'`
+
+Both `--file` and `--not-file` can be used multiple times in one command. Think about them as joined by logical AND.
 
 `--dot` - enable glob's `dot` setting to include names starting with dots, such as `.gitignore`. Example: `--file * --dot`
 
